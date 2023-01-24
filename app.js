@@ -21,7 +21,6 @@ app.use(bodyParser.json());
 
 
 app.use('/', require(__dirname + '/routes/homePage'));
-// app.use(path.join(__dirname ,'routes/home'), homepagee);
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/mydb', {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {

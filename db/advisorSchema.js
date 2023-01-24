@@ -7,4 +7,4 @@ const advisorSchema = new Schema({
     password: String,
 });
 
-module.exports =mongoose.model("advisor", advisorSchema) ;
+module.exports = mongoose.model("advisor", advisorSchema) ;

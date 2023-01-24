@@ -4,8 +4,8 @@ const { Schema } = mongoose;
 const approvalSchema = new Schema ({
     studentId : String,
     courseId : String,
-    approvalByInstructor : Boolean,
-    approvalByAdvisor : Boolean,
+    approvalByInstructor : Number,
+    approvalByAdvisor : Number,
 });
 
 module.exports = mongoose.model("approval", approvalSchema);

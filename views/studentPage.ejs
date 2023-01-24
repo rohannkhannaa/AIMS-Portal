@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Welcome <%= username %></a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li><a class = "active" href="/studentPage" >My courses</a></li>
+            <li><a href="/studentEnroll">Courses offered</a></li>
+          </ul>
+        </div>
+      </nav>
+    
+    </h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Course_name</th>
+                <th scope="col">Advisor Approval</th>
+                <th scope="col">Instructor Approval</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% approved.forEach(function(object){ %>
+                <tr>
+                    <th scope="row"></th>
+                    <td>
+                        <%= object.courseId%>
+                    </td>
+                    <td>
+                        <%= object.approvalByInstructor%>
+                    </td>
+                    <td>
+                        <%= object.approvalByAdvisor%>
+                    </td>
+                </tr>
+                <% }); %>
+                    
+        </tbody>
+
+
+    </table>
+	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	<script src="javascript/homepage.js"></script>
+</body>
+
+</html>

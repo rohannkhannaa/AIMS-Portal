@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Welcome Instructor <%= username %></a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li><a class = "active" href="/instructorPage" >Pending Requests</a></li>
+            <li><a href="/instructorApprove">Approved Requests</a></li>
+            <li><a href="/instructorReject">Rejected Requests</a></li>
+          </ul>
+        </div>
+      </nav>
+    
+    </h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Student_ID</th>
+                <th scope="col">Course_ID</th>
+                <th scope="col">Mark Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% approved.forEach(function(object){ %>
+                <tr>
+                    <th scope="row"></th>
+                    <td>
+                        <%= object.studentId%>
+                    </td>
+                    <td>
+                        <%= object.courseId%>
+                    </td>
+                    <td>
+                        <a href = "/inapprove/<%= object._id %>" class = "btn btn-danger btn-sm">Approve</a>
+                        <a href = "/indisapprove/<%= object._id %>" class = "btn btn-danger btn-sm">Disapprove</a>
+                    </td>
+                </tr>
+                <% }); %>
+                    
+        </tbody>
+
+
+    </table>
+	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+	<script src="javascript/homepage.js"></script>
+</body>
+
+</html>

@@ -31,7 +31,9 @@ mongoose.connect('mongodb://127.0.0.1:27017/mydb', {useNewUrlParser: true, useUn
   });
 
 
-
+app.get("/abcd", function(req, res){
+  res.render("homePage");
+})
 app.listen(3000, function(req, res){
     console.log("server is running on port 3000");
 });

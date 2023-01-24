@@ -29,8 +29,8 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">Course_name</th>
-                <th scope="col">Advisor Approval</th>
-                <th scope="col">Instructor Approval</th>
+                <th scope="col">Instructor Approval Status</th>
+                <th scope="col">Advisor Approval Status</th>
             </tr>
         </thead>
 
@@ -42,10 +42,23 @@
                         <%= object.courseId%>
                     </td>
                     <td>
-                        <%= object.approvalByInstructor%>
+                        <%if( object.approvalByInstructor == 0){%>
+                            Pending
+                        <%} else if( object.approvalByInstructor == 1){%>
+                            Approved
+                        <%} else{%>
+                            Rejected
+                        <% }%>
+
                     </td>
                     <td>
-                        <%= object.approvalByAdvisor%>
+                        <%if( object.approvalByAdvisor == 0){%>
+                            Pending
+                        <%} else if( object.approvalByAdvisor == 1){%>
+                            Approved
+                        <%} else{%>
+                            Rejected
+                        <% }%>
                     </td>
                 </tr>
                 <% }); %>

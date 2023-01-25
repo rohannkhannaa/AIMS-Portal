@@ -9,6 +9,7 @@ const session = require("express-session");
 const path = require("path");
 const app = express();
 const mongoose = require('mongoose');
+const jwt=require('jsonwebtoken');
 mongoose.set('strictQuery', false);
 
 app.use(express.static("public"));

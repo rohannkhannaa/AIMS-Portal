@@ -12,6 +12,8 @@ const { Router } = require("express");
 // const studentUser = require(path.join(__dirname, '../db/studentSchema'))
 // const advisorUser = require(path.join(__dirname, '../db/advisorSchema'))
 // const instructorUser = require(path.join(__dirname, '../db/instructorSchema'))
+const JWT_SECRET="randomsecret";
+const jwt=require('jsonwebtoken')
 
 const route = express.Router();
 route.use(cors());
@@ -464,5 +466,258 @@ route.get("/indisapprove/:_id", async (req, res) => {
             });
         }
     })
+})
+
+
+route.get('/forgot-password', (req,res) => {
+  res.render("forgot-password");
+})
+
+route.post('/forgot-password', async(req,res) => {
+  console.log(req.body);
+  let email=req.body.email;
+  let option=req.body.option;
+  req.session.email=email;
+  req.session.option=option;
+
+  let found="";
+  let link;
+  //console.log("here");
+  if(option=="s"){
+    const students = require(path.join(__dirname, '../db/studentSchema.js'));
+    const student = await students.findOne({email});
+    if (!student) return res.status(400).send({
+      message: "Invalid email"
+    });
+    req.session.id=student._id;
+    const secret=JWT_SECRET + student.password;
+    const payload= {
+      email: student.email,
+      id:student._id
+    };
+    const token = jwt.sign(payload, secret, {expiresIn:'15m'});
+    link = `http://localhost:3000/reset-password/${student._id}/${token}`;
+    //console.log(link);
+    found="found";
+    res.render("forgot-password-mail-sent");
+
+  }else if(option=="a"){
+    const advisers = require(path.join(__dirname, '../db/adviserSchema.js'));
+    const adviser = await advisers.findOne({email});
+    if (!adviser) return res.status(400).send({
+      message: "Invalid email"
+    });
+    req.session.id=id;
+    const secret=JWT_SECRET + adviser.password;
+    const payload= {
+      email: adviser.email,
+      id:adviser._id
+    };
+    const token = jwt.sign(payload, secret, {expiresIn:'15m'});
+    link = `http://localhost:3000/reset-password/${adviser._id}/${token}`;
+    console.log(link);
+    found="found";
+    res.render("forgot-password-mail-sent");
+
+  }else if(option=="i"){
+    const instructors = require(path.join(__dirname, '../db/instructorSchema.js'));
+    const instructor = await instructors.findOne({email});
+    if (!instructor) return res.status(400).send({
+      message: "Invalid email"
+    });
+    req.session.id=id;
+    const secret=JWT_SECRET + instructor.password;
+    const payload= {
+      email: instructor.email,
+      id:instructor._id
+    };
+    const token = jwt.sign(payload, secret, {expiresIn:'15m'});
+    link = `http://localhost:3000/reset-password/${instructor._id}/${token}`;
+    console.log(link);
+    found="found";
+    res.render("forgot-password-mail-sent");
+  }
+  if(found=="found"){
+    const mailOptions = {
+      from: "r.patidar181001.2@gmail.com",
+      to: email,
+      subject: "link for reset password",
+      html: `<p>Reset you password using the link. It is only valid for 15 min.</p><a href=${link}>link</a>`
+    };
+
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "r.patidar181001.2@gmail.com",
+            pass: "lftnzmpgnyibshxl"
+        }
+    });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.status(500).send({
+          message: "Failed to send link"
+        });
+      } else {
+        console.log("sent sent sent")
+        console.log("resetLink sent: " + info.response);
+        res.send({
+          message: "link resetlink"
+        });
+      }
+    });
+  }
+})
+
+
+
+route.get('/reset-password/:id/:token', async(req,res) => {
+  // console.log(req.params);
+  // console.log(req.session.option);
+  const id=req.params.id;
+  const option= req.session.option;
+  const token=req.params.token;
+  const link=`/reset-password/${id}/${token}`;
+
+  if(option=='s'){
+    const students = require(path.join(__dirname, '../db/studentSchema.js'));
+    const student = await students.findOne({_id:id});
+    if (!student) return res.status(400).send({
+      message: "Invalid email"
+    });
+    // console.log(student);
+    // console.log(student);
+    const secret=JWT_SECRET + student.password;
+    //console.log(secret);
+    try{
+      const payload = jwt.verify(token, secret);
+      res.render("reset-password",{link:link});
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+
+
+  } else if(option == "a"){
+    const advisers = require(path.join(__dirname, '../db/adviserSchema.js'));
+    const adviser = await advisers.findOne({_id:id});
+    if (!adviser) return res.status(400).send({
+      message: "Invalid email"
+    });
+
+    const secret=JWT_SECRET + adviser.password;
+    try{
+      const payload = jwt.verify(token, secret);
+      res.render("reset-password",{link:link});
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+  }else if(option == "i"){
+    const instructors = require(path.join(__dirname, '../db/instructorSchema.js'));
+    const instructor = await instructors.findOne({_id:id});
+    if (!instructor) return res.status(400).send({
+      message: "Invalid email"
+    });
+
+    const secret=JWT_SECRET + instructor.password;
+    try{
+      const payload = jwt.verify(token, secret);
+      res.render("reset-password",{link:link});
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+  }
+
+})
+
+route.post('/reset-password/:id/:token', async(req,res) => {
+  console.log("i m here")
+  const id=req.params.id;
+  const option= req.session.option;
+  const token=req.params.token;
+  const {password, repassword}=req.body;
+
+  if(option=='s'){
+    const students = require(path.join(__dirname, '../db/studentSchema.js'));
+    const student = await students.findOne({_id:id});
+    if (!student) return res.status(400).send({
+      message: "Invalid email"
+    });
+    // console.log(student);
+    // console.log(student);
+    const secret=JWT_SECRET + student.password;
+    //console.log(secret);
+    try{
+      const payload = jwt.verify(token, secret);
+      if(password==repassword){
+        console.log("matched");
+        const hashedPassword = bcrypt.hashSync(password, 1);
+        const student = await students.updateOne({_id:id},{$set: {password:hashedPassword}})
+        if (!student) return res.status(400).send({
+          message: "Invalid email"
+        });
+      }
+      res.render("reset-password-success");
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+
+
+  } else if(option == "a"){
+    const advisers = require(path.join(__dirname, '../db/adviserSchema.js'));
+    const adviser = await advisers.findOne({_id:id});
+    if (!adviser) return res.status(400).send({
+      message: "Invalid email"
+    });
+
+    const secret=JWT_SECRET + adviser.password;
+    try{
+      const payload = jwt.verify(token, secret);
+      if(password==repassword){
+        const hashedPassword = bcrypt.hashSync(password, 1);
+        const adviser = await advisers.updateOne({_id:id},{$set: {password:hashedPassword}})
+        if (!adviser) return res.status(400).send({
+          message: "Invalid email"
+        });
+      }
+      res.render("reset-password-success");
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+  }else if(option == "i"){
+    const instructors = require(path.join(__dirname, '../db/instructorSchema.js'));
+    const instructor = await instructors.findOne({_id:id});
+    if (!instructor) return res.status(400).send({
+      message: "Invalid email"
+    });
+
+    const secret=JWT_SECRET + instructor.password;
+    try{
+      const payload = jwt.verify(token, secret);
+      if(password==repassword){
+        const hashedPassword = bcrypt.hashSync(password, 1);
+        const instructor = await instructors.updateOne({_id:id},{$set: {password:hashedPassword}})
+        if (!instructor) return res.status(400).send({
+          message: "Invalid email"
+        });
+      }
+      res.render("reset-password-success");
+    }catch(error){
+      console.log(error);
+      res.send(error);
+    }
+
+  }
+
+
 })
 module.exports = route;

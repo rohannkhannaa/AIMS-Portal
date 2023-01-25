@@ -17,9 +17,8 @@
             <a class="navbar-brand" href="#">Welcome Instructor <%= username %></a>
           </div>
           <ul class="nav navbar-nav">
-            <li><a class = "active" href="/instructorPage" >Pending Requests</a></li>
-            <li><a href="/instructorApprove">Approved Requests</a></li>
-            <li><a href="/instructorReject">Rejected Requests</a></li>
+            <li><a class = "active" href="/instructorPage" >My Requests</a></li>
+            <li><a class = "active" href="/logout" >Logout</a></li>
           </ul>
         </div>
       </nav>
@@ -31,7 +30,8 @@
                 <th scope="col">#</th>
                 <th scope="col">Student_ID</th>
                 <th scope="col">Course_ID</th>
-                <th scope="col">Mark Status</th>
+                <th scope="col">Current status</th>
+                <th scope="col">Update Status</th>
             </tr>
         </thead>
 
@@ -44,6 +44,16 @@
                     </td>
                     <td>
                         <%= object.courseId%>
+                    </td>
+                    <td>
+                        <% if (object.status == 0){%>
+                            Pending
+                        <% } else if(object.status == 1){ %>
+                            Approved by you
+                        <% }else{ %>
+                            Rejected by you
+                        <% } %>
+
                     </td>
                     <td>
                         <a href = "/inapprove/<%= object._id %>" class = "btn btn-danger btn-sm">Approve</a>

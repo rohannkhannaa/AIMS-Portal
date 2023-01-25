@@ -24,6 +24,11 @@ route.use(session({
     saveUninitialized: true
 }));
 
+
+route.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/");
+})
 route.post('/', async (req, res) => {
     if (typeof req.body.username === 'undefined') {
         // Login
@@ -44,11 +49,7 @@ route.post('/', async (req, res) => {
                 message: "Invalid email or password"
             });
             else {
-                req.session.username = student[0].username;
-                req.session.save();
-                req.session.email = student[0].email;
-                req.session.save();
-                req.session.password = student[0].password;
+                req.session.student = student[0];
                 req.session.save();
                 res.redirect("/studentPage");
             }
@@ -65,11 +66,7 @@ route.post('/', async (req, res) => {
                 message: "Invalid email or password"
             });
             else {
-                req.session.username = advisor[0].username;
-                req.session.save();
-                req.session.email = advisor[0].email;
-                req.session.save();
-                req.session.password = advisor[0].password;
+                req.session.advisor = advisor[0];
                 req.session.save();
                 res.redirect("/advisorPage");
             }
@@ -86,11 +83,7 @@ route.post('/', async (req, res) => {
                 message: "Invalid email or password"
             });
             else {
-                req.session.username = instructor[0].username;
-                req.session.save();
-                req.session.email = instructor[0].email;
-                req.session.save();
-                req.session.password = instructor[0].password;
+                req.session.instructor = instructor[0];
                 req.session.save();
                 res.redirect("/instructorPage");
             }
@@ -135,10 +128,8 @@ route.post('/', async (req, res) => {
                 pass: "lftnzmpgnyibshxl"
             }
         });
-        const hashedPassword = bcrypt.hashSync(password, 1);
         console.log(otp);
-
-
+        const hashedPassword = bcrypt.hashSync(password, 1);
         const mailOptions = {
             from: "r.patidar181001.2@gmail.com",
             to: email,
@@ -206,6 +197,8 @@ route.post("/otp", async (req, res) => {
             // console.log("Idhar hai");
             // console.log(newStudent);
             await newStudent.save();
+            req.session.student = newStudent;
+            req.session.save();
             req.session.email = newStudent.email;
             req.session.save();
             res.redirect('/studentPage');
@@ -221,6 +214,8 @@ route.post("/otp", async (req, res) => {
                 password: hashedPassword
             });
             await newAdvisor.save();
+            req.session.advisor = newAdvisor;
+            req.session.save();
             req.session.email = newAdvisor.email;
             req.session.save();
             res.redirect('/advisorPage');
@@ -236,6 +231,8 @@ route.post("/otp", async (req, res) => {
                 password: hashedPassword
             });
             await newInstructor.save();
+            req.session.instructor = newInstructor;
+            req.session.save();
             req.session.email = newInstructor.email;
             req.session.save();
             res.redirect('/instructorPage');
@@ -247,14 +244,15 @@ route.post("/otp", async (req, res) => {
 
 
 route.get("/studentPage", async (req, res) => {
-    const email = req.session.email;
+    const student = req.session.student;
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
-    const username = req.session.username;
-    if (typeof username == 'undefined') {
+    if (typeof student == 'undefined') {
         return res.status(400).send(
             '<p>Please Login first</p><a href = "/">Login now</a>'
         );
     }
+    const username = student.username;
+    const email = student.email;
     approvals.find({ studentId: email }, function (err, approved) {
         console.log("Yha bhi dekho vro");
         console.log(approved);
@@ -271,27 +269,35 @@ route.get("/studentEnroll", async (req, res) => {
     // const username = req.session.username;
 
     // approvals.find({}, function (err, approved) {
-    const username = req.session.username;
-    const email = req.session.email;
+    const student = req.session.student;
     const courses = require(path.join(__dirname, '../db/courseSchema.js'));
-    const approvals = require(path.join(__dirname, '../db/approvals.js'));
+    if (typeof student == 'undefined') {
+        return res.status(400).send(
+            '<p>Please Login first</p><a href = "/">Login now</a>'
+        );
+    }
+    const username = student.username;
+    courses.find({}, function (err, courseList) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render("studentEnroll", {
+                username: username,
+                courseList: courseList
+            });
+        }
+    })
+});
+
+route.get("/enroll/:_id", async (req, res) => {
+    const email = req.session.student.email;
+    const username = req.session.student.username;
+    const { _id } = req.params;
     if (typeof username == 'undefined') {
         return res.status(400).send(
             '<p>Please Login first</p><a href = "/">Login now</a>'
         );
     }
-    courses.find({}, function (err, courseList) {
-        res.render("studentEnroll", {
-            username: username,
-            courseList: courseList
-        });
-    })
-});
-
-route.get("/enroll/:_id", async (req, res) => {
-    const email = req.session.email;
-    const { _id } = req.params;
-
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
     const instructorApproves = require(path.join(__dirname, '../db/instructorApprovalSchema'))
     const advisorApproves = require(path.join(__dirname, '../db/advisorApprovalSchema'))
@@ -307,42 +313,42 @@ route.get("/enroll/:_id", async (req, res) => {
                 approvalByAdvisor: 0,
             });
             const instructorApprove = new instructorApproves({
-                studentId : email,
-                instructorId : course[0].instructorId,
-                courseId : course[0].courseId,
-                status : 0
+                studentId: email,
+                instructorId: course[0].instructorId,
+                courseId: course[0].courseId,
+                status: 0
             })
             const advisorApprove = new advisorApproves({
-                studentId : email,
-                advisorId : course[0].advisorId,
-                courseId : course[0].courseId,
-                status : 0
+                studentId: email,
+                advisorId: course[0].advisorId,
+                courseId: course[0].courseId,
+                status: 0
             })
             await approval.save();
             await advisorApprove.save();
             await instructorApprove.save();
-            res.redirect("/studentEnroll");
+            res.send("Requested !");
         }
     });
 })
 
 route.get("/advisorPage", async (req, res) => {
-    const username = req.session.username;
-    const email = req.session.email;
-    console.log("Dekh yha to aaya");
-    if (typeof username == "undefined") {
+    const advisor = req.session.advisor;
+    if (typeof advisor == "undefined") {
         return res.status(400).send(
             '<p>Please Login first</p><a href = "/">Login now</a>'
         );
-    }else{
+    } else {
+        const username = advisor.username;
+        const email = advisor.email;
         const advisorApproves = require(path.join(__dirname, '../db/advisorApprovalSchema'))
-        advisorApproves.find({advisorId : email, status : 0}, async(err, approved)=>{
-            if(err){
+        advisorApproves.find({ advisorId: email }, async (err, approved) => {
+            if (err) {
                 console.log(err);
-            }else{
+            } else {
                 res.render("advisorPage", {
-                    username : username, 
-                    approved : approved,
+                    username: username,
+                    approved: approved,
                 });
             }
         })
@@ -352,69 +358,64 @@ route.get("/advisorPage", async (req, res) => {
 
 
 route.get("/adapprove/:_id", async (req, res) => {
-    const email = req.session.email;
-    const {_id} = req.params ;
+    const { _id } = req.params;
     const advisorApproves = require(path.join(__dirname, '../db/advisorApprovalSchema'))
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
-    advisorApproves.findOne({_id : _id}, async(err, recordData)=>{
-        if(err){
+    advisorApproves.findOneAndUpdate({ _id: _id }, { status: 1 }, { upsert: true }, function (err, recordData) {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             console.log(recordData);
-            const stid  = recordData.studentId ;
-            const cid = recordData.courseId ;
+            const stid = recordData.studentId;
+            const cid = recordData.courseId;
             console.log(stid);
             console.log(cid);
-            approvals.findOneAndUpdate({studentId : stid, courseId : cid}, {approvalByAdvisor : 1}, {upsert : true}, function(err, doc) {
-                if (err) return res.send(500, {error: err});
-                return res.send('Succesfully saved.');
+            approvals.findOneAndUpdate({ studentId: stid, courseId: cid }, { approvalByAdvisor: 1 }, { upsert: true }, function (err, doc) {
+                if (err) return res.send(500, { error: err });
+                return res.redirect('/advisorPage');
             });
-            recordData.status = 1 ;
-
         }
-    })  
+    })
 })
 route.get("/addisapprove/:_id", async (req, res) => {
-    const email = req.session.email;
-    const {_id} = req.params ;
+    const { _id } = req.params;
     const advisorApproves = require(path.join(__dirname, '../db/advisorApprovalSchema'))
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
-    advisorApproves.findOne({_id : _id}, async(err, recordData)=>{
-        if(err){
+    advisorApproves.findOneAndUpdate({ _id: _id }, { status: 2 }, { upsert: true }, function (err, recordData) {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             console.log(recordData);
-            const stid  = recordData.studentId ;
-            const cid = recordData.courseId ;
+            const stid = recordData.studentId;
+            const cid = recordData.courseId;
             console.log(stid);
             console.log(cid);
-            approvals.findOneAndUpdate({studentId : stid, courseId : cid}, {approvalByAdvisor : 2}, {upsert : true}, function(err, doc) {
-                if (err) return res.send(500, {error: err});
-                return res.send('Succesfully saved.');
+            approvals.findOneAndUpdate({ studentId: stid, courseId: cid }, { approvalByAdvisor: 2 }, { upsert: true }, function (err, doc) {
+                if (err) return res.send(500, { error: err });
+                return res.redirect('/advisorPage');
             });
-            recordData.status = 2 ;
-
         }
-    })  
+    })
 });
 
 route.get("/instructorPage", async (req, res) => {
-    const username = req.session.username;
-    const email = req.session.email;
+    const instructor = req.session.instructor;
     console.log("Dekh yha to aaya");
-    if (typeof username == "undefined") {
+    if (typeof instructor == "undefined") {
         return res.status(400).send(
             '<p>Please Login first</p><a href = "/">Login now</a>'
         );
-    }else{
+    } else {
+        const email = instructor.email;
+        const username = instructor.username;
         const instructorApproves = require(path.join(__dirname, '../db/instructorApprovalSchema'))
-        instructorApproves.find({instructorId : email, status : 0}, async(err, approved)=>{
-            if(err){
+        instructorApproves.find({ instructorId: email }, async (err, approved) => {
+            if (err) {
                 console.log(err);
-            }else{
+            } else {
                 res.render("instructorPage", {
-                    username : username, 
-                    approved : approved,
+                    username: username,
+                    approved: approved,
                 });
             }
         })
@@ -424,47 +425,44 @@ route.get("/instructorPage", async (req, res) => {
 
 
 route.get("/inapprove/:_id", async (req, res) => {
-    const email = req.session.email;
-    const {_id} = req.params ;
+    const { _id } = req.params;
     const instructorApproves = require(path.join(__dirname, '../db/instructorApprovalSchema'))
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
-    instructorApproves.findOne({_id : _id}, async(err, recordData)=>{
-        if(err){
+    instructorApproves.findOneAndUpdate({ _id: _id }, { status: 1 }, { upsert: true }, function (err, recordData) {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             console.log(recordData);
-            const stid  = recordData.studentId ;
-            const cid = recordData.courseId ;
+            const stid = recordData.studentId;
+            const cid = recordData.courseId;
             console.log(stid);
             console.log(cid);
-            approvals.findOneAndUpdate({studentId : stid, courseId : cid}, {approvalByInstructor : 1}, {upsert : true}, function(err, doc) {
-                if (err) return res.send(500, {error: err});
-                return res.send('Succesfully saved.');
+            approvals.findOneAndUpdate({ studentId: stid, courseId: cid }, { approvalByInstructor: 1 }, { upsert: true }, function (err, doc) {
+                if (err) return res.send(500, { error: err });
+                return res.redirect("/instructorPage");
             });
-            recordData.status = 1 ;
         }
-    })  
+    })
 })
 route.get("/indisapprove/:_id", async (req, res) => {
     const email = req.session.email;
-    const {_id} = req.params ;
+    const { _id } = req.params;
     const instructorApproves = require(path.join(__dirname, '../db/instructorApprovalSchema'))
     const approvals = require(path.join(__dirname, '../db/approvals.js'));
-    instructorApproves.findOne({_id : _id}, async(err, recordData)=>{
-        if(err){
+    instructorApproves.findOneAndUpdate({ _id: _id }, { status: 2 }, { upsert: true }, function (err, recordData) {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             console.log(recordData);
-            const stid  = recordData.studentId ;
-            const cid = recordData.courseId ;
+            const stid = recordData.studentId;
+            const cid = recordData.courseId;
             console.log(stid);
             console.log(cid);
-            approvals.findOneAndUpdate({studentId : stid, courseId : cid}, {approvalByInstructor : 2}, {upsert : true}, function(err, doc) {
-                if (err) return res.send(500, {error: err});
-                return res.send('Succesfully saved.');
+            approvals.findOneAndUpdate({ studentId: stid, courseId: cid }, { approvalByInstructor: 2 }, { upsert: true }, function (err, doc) {
+                if (err) return res.send(500, { error: err });
+                return res.redirect("/instructorPage");
             });
-            recordData.status = 2 ;
         }
-    })  
+    })
 })
 module.exports = route;

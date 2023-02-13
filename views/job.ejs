@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Daily Journal</title>
+  <meta charset="utf-8">
+  <script src="https://kit.fontawesome.com/2361d96b39.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-straight/css/uicons-regular-straight.css'>
+  <link rel="stylesheet" href="/css/homepage.css">
+  <nav class="navbar navbar-default ">
+    <div class="container">
+      <div class="navbar-header">
+        <p class="navbar-brand">JOB PORTAL</p>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+        <!-- 6 -->
+        <li id="home"><a href="/">Find job</a></li>
+        <li id="about"><a href="/postjob">Post Job</a></li>
+        <li id="contact"><a href="/login">Login/Signup</a></li>
+
+      </ul>
+    </div>
+  </nav>
+</head>
+
+<body>
+  <div class="container">
+    <h1><%= job.title %></h1>
+    <h5><%= job.by %></h5>
+    <h5><i class="fi fi-rs-marker"></i>&nbsp<%= job.location %></h5>
+    <h5> Rs. <%= job.salary %></h5>
+    <p><%= job.description %></p>
+    <a href="#"><button type="button" class="btn btn-primary btn-block" style="margin-top:20px; width:15%">Apply</button></a>
+  </div>
+
+</body>
+
+</html>

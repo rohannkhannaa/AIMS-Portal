@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Daily Journal</title>
+  <meta charset="utf-8">
+  <script src="https://kit.fontawesome.com/2361d96b39.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/homepage.css">
+  <nav class="navbar navbar-default ">
+    <div class="container">
+      <div class="navbar-header">
+        <p class="navbar-brand">JOB PORTAL</p>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+        <!-- 6 -->
+        <li id="home"><a href="/">Find job</a></li>
+        <li id="about"><a href="/postjob">Post Job</a></li>
+        <li id="contact"><a href="/login">Login/Signup</a></li>
+
+      </ul>
+    </div>
+  </nav>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Post A Job</h1>
+    <form method="POST" action="/postjob">
+
+      <label for="title">Title&nbsp&nbsp</label>
+      <input type="text" name="title" id="title" class="form-control" placeholder="Title" required autofocus>
+      <label for="institution">Institution&nbsp&nbsp</label>
+      <input type="text" name="institution" id="institution" class="form-control" placeholder="Institution" required autofocus>
+      <label for="location">Location&nbsp&nbsp</label>
+      <input type="text" name="location" id="location" class="form-control" placeholder="Location" required autofocus>
+      <label for="salary">Salary&nbsp&nbsp</label>
+      <input type="number" name="salary" id="salary" class="form-control" placeholder="Salary" required autofocus>
+      <label for="description">Description&nbsp&nbsp</label>
+      <input type="text" name="description" id="description" class="form-control" placeholder="Description" required autofocus>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:20px; width:15%">Submit</button>
+    </form>
+  </div>
+
+</body>
+
+</html>

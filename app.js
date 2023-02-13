@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.use('/', require(__dirname + '/routes/homePage'));
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/mydb', {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
+mongoose.connect('mongodb://127.0.0.1:27017/jobPortalDB', {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
     console.log('connected');
   })
   .catch((e) => {
